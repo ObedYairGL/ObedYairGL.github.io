@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <script src="https://code.jquery.com/jquery-3.6.3.min.js" 
+        integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" 
+        crossorigin="anonymous"></script>
+
+        <!-- Compiled and minified CSS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+        <!-- Compiled and minified JavaScript -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+        <title>Versus</title>
+
+        <style>
+            .divisionXD {
+                background-image: url('img/XD.png');
+            }
+
+            .divisionBronce {
+                background-image: url('img/Bronce.png');
+            }
+
+            .divisionPlata {
+                background-image: url('img/Plata.png');
+            }
+
+            .divisionOro {
+                background-image: url('img/Oro.png');
+            }
+
+            .divisionPlatino {
+                background-image: url('img/Platino.png');
+            }
+
+            .divisionDiamante {
+                background-image: url('img/Diamante.png');
+            }
+
+            .divisionMaestro {
+                background-image: url('img/Maestro.png');
+            }
+
+            .divisionGranMaestro {
+                background-image: url('img/Gran Maestro.png');
+            }
+
+            .divisionChallenger {
+                background-image: url('img/Challenger.png');
+            }
+        </style>
+    </head>
+    <body>
+        <div class="row center-align">
+            <div class="col m9">
+                <h3>Ranking de Versus</h3>
+                <div class="row">
+                    <div class="col m4">
+                        <a class="btn indigo darken-4 white-text" onclick="guardaJSON()">Guardar</a>
+                    </div>
+                    <div class="col m4">
+                        <a class="btn indigo darken-4 white-text" onclick="randomizaEquipos()">Armar Equipos</a>
+                    </div>
+                    <div class="col m4">
+                        <a class="btn indigo darken-4 white-text" onclick="cargaJSON()">Cargar</a>
+                    </div>
+                </div>
+                <table class="highlight">
+                    <thead>
+                        <tr>
+                            <th>Juega</th>
+                            <th>Jugador</th>
+                            <th>Puntos</th>
+                            <th>División</th>
+                        </tr>
+                    </thead>
+                    <tbody class="jugadores">
+                    </tbody>
+                </table>
+            </div>
+            <div class="col m3 row" style="margin-top: 2rem;">
+                <div class="col m9" style="margin-bottom: 1rem;">
+                    <div class="indigo darken-4 white-text" style="padding: .6rem; font-size: 1rem; border-radius: .4rem; font-weight: 400;">
+                        Equipo Azul
+                    </div>
+                    <div id="equipoAzul">
+                    </div>
+                </div>
+                <div class="col m3">
+                    <a class="btn waves-effect waves-light green" onclick="ganaAzul()">SUMA</a>
+                </div>
+                <div class="col m9">
+                    <div class="red white-text" style="padding: .6rem; font-size: 1rem; border-radius: .4rem; font-weight: 400;">
+                        Equipo Rojo
+                    </div>
+                    <div id="equipoRojo">
+                    </div>
+                </div>
+                <div class="col m3">
+                    <a class="btn waves-effect waves-light green" onclick="ganaRojo()">SUMA</a>
+                </div>
+            </div>
+        </div>
+    </body>
+
+    <script>
+        var Divisiones = [["XD", 25, 5], ["Bronce", 20, 5], ["Plata", 20, 10], ["Oro", 20, 10], ["Platino", 15, 10], ["Diamante", 15, 12], 
+                        ["Maestro", 10, 10], ["GranMaestro", 5, 5], ["Challenger", 1, 1]];
+        Jugadores = [];
+        var equipoAzul = new Array();
+        var equipoRojo = new Array();
+
+        function download(content, fileName, contentType) {
+            var a = document.createElement("a");
+            var file = new Blob([content], {type: contentType});
+            a.href = URL.createObjectURL(file);
+            a.download = fileName;
+            a.click();
+        }
+
+        function guardaJSON() {
+            download(JSON.stringify(Jugadores), 'VS.json', 'application/json');
+        }
+
+        function cargaJSON() {
+            fetch('./VS.json', {cache: "no-store"})
+                .then((response) => response.json())
+                .then(function (json) {
+                    json.forEach(function(element) {
+                        Jugadores.push(element);
+                    });
+
+                    Jugadores.forEach(function(element, index) {
+                    var html = "<tr>\
+                                <td><p><label><input name='juega' player='" + element[0] + "' playerid='" + index + "' type='checkbox'/><span></span></label></p></td>\
+                                <td>" + element[0] + "</td>\
+                                <td id='" + index + "Puntos'>" + element[1] + "</td>\
+                                <td id='" + index + "Division' idDivision='" + element[2] + "'><div style='background-size: contain; height: 5rem; width: 5rem;' class='division"+Divisiones[element[2]][0]+"'></div></td>\
+                            </tr>\
+                    ";
+
+                    $(".jugadores").append(html);
+                });
+                });
+        }
+
+        function sumaPuntos(id) {
+            var puntos = parseInt($("#" + id + "Puntos").text());
+            var division = parseInt($("#" + id + "Division").attr("idDivision"));
+
+            puntos += Divisiones[division][1];
+
+            if(puntos >= 100) {
+                validaDivision(id, division, 'P');
+                puntos = puntos - 100;
+            }
+
+            Jugadores[id][1] = puntos;
+            $("#" + id + "Puntos").text(puntos)
+        }
+
+        function restaPuntos(id) {
+            var puntos = parseInt($("#" + id + "Puntos").text());
+            var division = $("#" + id + "Division").attr("idDivision");
+
+            puntos -= Divisiones[division][2];
+
+            if(puntos < 0) {
+                if(division == 0) {
+                    puntos = 0;
+                    
+                } else {
+                    validaDivision(id, division, 'D');
+                    puntos = 100 + puntos;
+                }
+            }
+
+            Jugadores[id][1] = puntos;
+            $("#" + id + "Puntos").text(puntos)
+        }
+
+        function validaDivision(id, divisionActual, accion) {
+            if(accion == 'P') {
+                divisionActual++;
+                $("#" + id + "Division").attr("idDivision", divisionActual);
+                $("#" + id + "Division").text(Divisiones[divisionActual][0]);
+            } else {
+                divisionActual--;
+                $("#" + id + "Division").attr("idDivision", divisionActual);
+                $("#" + id + "Division").text(Divisiones[divisionActual][0]);
+            }
+
+            Jugadores[id][2] = divisionActual;
+            return parseInt(divisionActual);
+        }
+        
+        function randomizaEquipos() {
+            $('#equipoAzul').empty();
+            $('#equipoRojo').empty();
+            equipoAzul = [];
+            equipoRojo = [];
+            var checks = $('input[name=juega]:checked');
+            var jugadoresActuales = new Array();
+
+            var jugadoresTotales = checks.length;
+            checks.each(function(index, element) {
+                jugadoresActuales.push([$(element).attr("player"), $(element).attr("playerid")]);
+            });
+
+            console.log(jugadoresActuales);
+
+            jugadoresActuales = jugadoresActuales.sort(function () {
+                return Math.random() - 0.5;
+            });
+
+            console.log(jugadoresActuales);
+
+            jugadoresActuales.forEach(function(element, index) {
+                if(index < parseInt((jugadoresTotales / 2))) {
+                    equipoAzul.push(element[1]);
+                    $('#equipoAzul').append('<div style="border-left: .3rem #1a237e solid; margin-top: .8rem;">' + element[0] + '</div>');
+                } else {
+                    equipoRojo.push(element[1]);
+                    $('#equipoRojo').append('<div style="border-left: .3rem red solid; margin-top: .8rem;">' + element[0] + '</div>');
+                }
+            });
+        }
+
+        function ganaAzul() {
+            equipoAzul.forEach(function(element, index) {
+                sumaPuntos(element);
+            });
+            equipoRojo.forEach(function(element, index) {
+                restaPuntos(element);
+            });
+        }
+
+        function ganaRojo() {
+            equipoRojo.forEach(function(element, index) {
+                sumaPuntos(element);
+            });
+            equipoAzul.forEach(function(element, index) {
+                restaPuntos(element);
+            });
+        }
+    </script>
+</html>

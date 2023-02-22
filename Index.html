@@ -188,11 +188,14 @@
             if(accion == 'P') {
                 divisionActual++;
                 $("#" + id + "Division").attr("idDivision", divisionActual);
-                $("#" + id + "Division").text(Divisiones[divisionActual][0]);
+                $("#" + id + "Division div").removeClass("division"+ Divisiones[divisionActual-1][0]);
+                $("#" + id + "Division div").addClass("division"+ Divisiones[divisionActual][0]);
+
             } else {
                 divisionActual--;
                 $("#" + id + "Division").attr("idDivision", divisionActual);
-                $("#" + id + "Division").text(Divisiones[divisionActual][0]);
+                $("#" + id + "Division div").removeClass("division"+ Divisiones[divisionActual+1][0]);
+                $("#" + id + "Division div").addClass("division"+ Divisiones[divisionActual][0]);
             }
 
             Jugadores[id][2] = divisionActual;
